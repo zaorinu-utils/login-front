@@ -2,34 +2,75 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Login GitHub OAuth</title>
+  <title>Login GitHub com JWT</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 3rem; }
+    button { padding: 10px 20px; font-size: 1rem; margin: 1rem; }
+  </style>
 </head>
 <body>
   <h1>Login com GitHub</h1>
-  <a href="https://github.com/login/oauth/authorize?client_id=Ov23liDydrs0YSmOnO9m&redirect_uri=https://login-tests-six.vercel.app/api/callback">
-    Entrar com GitHub
-  </a>
-
-  <p id="user">Você não está logado</p>
+  <div id="user">Verificando login...</div>
+  <button id="loginBtn" style="display:none;">Entrar com GitHub</button>
+  <button id="logoutBtn" style="display:none;">Sair</button>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
+    const clientId = 'Ov23liDydrs0YSmOnO9m';
+    const redirectUri = 'https://zaorinu-utils.github.io/login-front/';
+    const backendURL = 'https://login-tests-six.vercel.app';
 
-    if (token) {
-      fetch(`https://login-tests-six.vercel.app/api/validate?token=${token}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.valid) {
-            document.getElementById('user').textContent = `Olá, ${data.username}`;
-          } else {
-            document.getElementById('user').textContent = 'Token inválido ou expirado';
-          }
-        })
-        .catch(() => {
-          document.getElementById('user').textContent = 'Erro na validação do token';
-        });
+    const userDiv = document.getElementById('user');
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    loginBtn.onclick = () => {
+      window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    };
+
+    logoutBtn.onclick = () => {
+      localStorage.removeItem('token');
+      showLoggedOut();
+    };
+
+    function showLogged(username) {
+      userDiv.textContent = `Olá, ${username}!`;
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
     }
+
+    function showLoggedOut() {
+      userDiv.textContent = 'Você não está logado.';
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+    }
+
+    async function validate(token) {
+      const res = await fetch(`${backendURL}/api/validate?token=${token}`);
+      const data = await res.json();
+      return data;
+    }
+
+    async function init() {
+      const urlToken = new URLSearchParams(window.location.search).get('token');
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+        window.history.replaceState({}, document.title, '/login-front/');
+      }
+
+      const token = localStorage.getItem('token');
+      if (token) {
+        const data = await validate(token);
+        if (data.valid) {
+          showLogged(data.username);
+        } else {
+          showLoggedOut();
+        }
+      } else {
+        showLoggedOut();
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
