@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Login GitHub</title>
+  <title>Login GitHub OAuth</title>
 </head>
 <body>
   <h1>Login com GitHub</h1>
@@ -10,14 +10,25 @@
     Entrar com GitHub
   </a>
 
-  <div id="resposta"></div>
+  <p id="user">Você não está logado</p>
 
   <script>
-    // Exibir resultado da verificação de login
     const params = new URLSearchParams(window.location.search);
-    if (params.get("username")) {
-      document.getElementById("resposta").innerText =
-        `Você está logado como ${params.get("username")}`;
+    const token = params.get('token');
+
+    if (token) {
+      fetch(`https://login-tests-six.vercel.app//api/validate?token=${token}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.valid) {
+            document.getElementById('user').textContent = `Olá, ${data.username}`;
+          } else {
+            document.getElementById('user').textContent = 'Token inválido ou expirado';
+          }
+        })
+        .catch(() => {
+          document.getElementById('user').textContent = 'Erro na validação do token';
+        });
     }
   </script>
 </body>
