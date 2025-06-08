@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login GitHub</title>
+</head>
+<body>
+  <h1>Login com GitHub</h1>
+  <a href="https://github.com/login/oauth/authorize?client_id=Ov23liDydrs0YSmOnO9m&redirect_uri=https://login-tests-six.vercel.app/api/callback">
+    Entrar com GitHub
+  </a>
+
+  <div id="resposta"></div>
+
+  <script>
+    // Exibir resultado da verificação de login
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("username")) {
+      document.getElementById("resposta").innerText =
+        `Você está logado como ${params.get("username")}`;
+    }
+  </script>
+</body>
+</html>
