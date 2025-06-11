@@ -2,17 +2,17 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Login GitHub com JWT</title>
+  <title>Zunalita Auth</title>
   <style>
     body { font-family: sans-serif; text-align: center; margin-top: 3rem; }
     button { padding: 10px 20px; font-size: 1rem; margin: 1rem; }
   </style>
 </head>
 <body>
-  <h1>Login com GitHub</h1>
-  <div id="user">Verificando login...</div>
-  <button id="loginBtn" style="display:none;">Entrar com GitHub</button>
-  <button id="logoutBtn" style="display:none;">Sair</button>
+  <h1>Click to Login!</h1>
+  <div id="user">Verifying...</div>
+  <button id="loginBtn" style="display:none;">Enter with Github</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
 
   <script>
     const clientId = 'Ov23liDydrs0YSmOnO9m';
@@ -33,13 +33,13 @@
     };
 
     function showLogged(username) {
-      userDiv.textContent = `Olá, ${username}!`;
+      userDiv.textContent = `Hello, ${username}!`;
       loginBtn.style.display = 'none';
       logoutBtn.style.display = 'inline-block';
     }
 
     function showLoggedOut() {
-      userDiv.textContent = 'Você não está logado.';
+      userDiv.textContent = 'You are not logged.';
       loginBtn.style.display = 'inline-block';
       logoutBtn.style.display = 'none';
     }
