@@ -23,24 +23,6 @@
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // Controle de rate limit no cliente
-    function podeValidar() {
-      const LIMITE = 5;
-      const INTERVALO = 60 * 1000; // 1 minuto
-      const agora = Date.now();
-      let historico = JSON.parse(localStorage.getItem('validate_attempts')) || [];
-      historico = historico.filter(ts => agora - ts < INTERVALO);
-
-      if (historico.length >= LIMITE) {
-        localStorage.setItem('validate_bloqueado', 'true');
-        return false;
-      }
-      historico.push(agora);
-      localStorage.setItem('validate_attempts', JSON.stringify(historico));
-      localStorage.removeItem('validate_bloqueado');
-      return true;
-    }
-
     loginBtn.onclick = () => {
       window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
     };
@@ -63,22 +45,7 @@
     }
 
     async function validate(token) {
-      // Conta tentativas para rate limit
-      let tentativas = 0;
-      let historico = JSON.parse(localStorage.getItem('validate_attempts')) || [];
-      const agora = Date.now();
-      historico = historico.filter(ts => agora - ts < 60 * 1000);
-      tentativas = historico.length;
-
-      const res = await fetch(`${backendURL}/api/validate?token=${token}`, {
-        headers: {
-          'x-login-attempts': tentativas
-        }
-      });
-      // Atualiza tentativas após a requisição
-      if (res.status === 429) {
-        localStorage.setItem('validate_bloqueado', 'true');
-      }
+      const res = await fetch(`${backendURL}/api/validate?token=${token}`);
       const data = await res.json();
       return data;
     }
@@ -90,22 +57,8 @@
         window.history.replaceState({}, document.title, '/login-front/');
       }
 
-      // Checa se está bloqueado
-      if (localStorage.getItem('validate_bloqueado')) {
-        userDiv.textContent = 'Você atingiu o limite de tentativas. Tente novamente em 1 minuto.';
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
-        return;
-      }
-
       const token = localStorage.getItem('token');
       if (token) {
-        if (!podeValidar()) {
-          userDiv.textContent = 'Você atingiu o limite de tentativas. Tente novamente em 1 minuto.';
-          loginBtn.style.display = 'none';
-          logoutBtn.style.display = 'inline-block';
-          return;
-        }
         const data = await validate(token);
         if (data.valid) {
           showLogged(data.username);
