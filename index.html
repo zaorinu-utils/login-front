@@ -69,10 +69,21 @@
     }
 
     async function init() {
-      const urlToken = new URLSearchParams(window.location.search).get('token');
-      if (urlToken) {
+      const params = new URLSearchParams(window.location.search);
+      const urlToken = params.get('token');
+      const urlState = params.get('state');
+
+      if (urlToken && urlState) {
+        // Salva o token no localStorage
         localStorage.setItem('token', urlToken);
-        window.history.replaceState({}, document.title, '/login-front/');
+
+        // Limpa a URL para remover os tokens expostos
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        // Dá reload para inicializar app limpo
+        window.location.reload();
+        return; // Para evitar continuar execução antes do reload
       }
 
       const token = localStorage.getItem('token');
