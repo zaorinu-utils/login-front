@@ -23,8 +23,20 @@
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    loginBtn.onclick = () => {
-      window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    loginBtn.onclick = async () => {
+      try {
+        const stateRes = await fetch(`${backendURL}/api/state`);
+        const stateData = await stateRes.json();
+        const state = stateData.state;
+
+        localStorage.setItem('oauth_state', state); // opcional: guardar p/ checagem futura
+
+        const authURL = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+        window.location.href = authURL;
+      } catch (err) {
+        console.error('Erro ao obter state:', err);
+        alert('Erro ao iniciar login. Tente novamente.');
+      }
     };
 
     logoutBtn.onclick = () => {
