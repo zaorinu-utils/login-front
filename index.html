@@ -44,15 +44,37 @@
       logoutBtn.style.display = 'none';
     }
 
+    async function getClientIp() {
+      try {
+        const res = await fetch('https://api.ipify.org?format=text');
+        return await res.text();
+      } catch {
+        return null;
+      }
+    }
+
     async function validate(token) {
+      const clientIp = await getClientIp();
+      if (!clientIp) {
+        // Se não conseguir pegar IP, consideramos inválido por segurança
+        return { valid: false, error: 'Unable to get client IP' };
+      }
+
       const res = await fetch(`${backendURL}/api/validate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'X-Client-IP': clientIp
         },
       });
       const data = await res.json();
+
+      // Se token inválido por causa do IP, remove localStorage
+      if (!data.valid) {
+        localStorage.removeItem('token');
+      }
+
       return data;
     }
 
